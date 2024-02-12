@@ -1,4 +1,4 @@
-module org.openjfx {
+module nervtracer {
     requires javafx.controls;
-    exports org.openjfx;
+    exports unitmax;
 }

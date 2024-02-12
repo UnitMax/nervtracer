@@ -1,4 +1,4 @@
-package org.openjfx;
+package unitmax;
 
 public class SystemInfo {
 
