@@ -10,6 +10,10 @@ public class Vec3 {
         // Arrays in Java are 0-initialized
     }
 
+    public static Vec3 create(double e0, double e1, double e2) {
+        return new Vec3(e0, e1, e2);
+    }
+
     public Vec3(double e0, double e1, double e2) {
         this.e[0] = e0;
         this.e[1] = e1;
