@@ -12,6 +12,7 @@ import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import unitmax.graphics.Ray;
+import unitmax.graphics.Sphere;
 import unitmax.math.Vec3;
 
 /**
@@ -85,7 +86,11 @@ public class App extends Application {
                         var rayDirection = pixelCenter.sub(cameraCenter);
                         Ray r = new Ray(cameraCenter, rayDirection);
 
-                        pixelWriter.setColor(i, j, vec3toRGB(rayColor(r)));
+                        if (Sphere.hit(Vec3.create(0, 0, -1), 0.5, r)) {
+                            pixelWriter.setColor(i, j, Color.rgb(255, 0, 0));
+                        } else {
+                            pixelWriter.setColor(i, j, vec3toRGB(rayColor(r)));
+                        }
                     }
                 }
             }
