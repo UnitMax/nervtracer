@@ -21,7 +21,7 @@ public class Ray {
         this.direction = direction;
     }
 
-    Vec3 at(double t) {
+    public Vec3 at(double t) {
         // origin + t * direction;
         return origin.add(direction.multScalar(t));
     }

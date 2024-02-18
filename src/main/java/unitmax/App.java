@@ -86,8 +86,11 @@ public class App extends Application {
                         var rayDirection = pixelCenter.sub(cameraCenter);
                         Ray r = new Ray(cameraCenter, rayDirection);
 
-                        if (Sphere.hit(Vec3.create(0, 0, -1), 0.5, r)) {
-                            pixelWriter.setColor(i, j, Color.rgb(255, 0, 0));
+                        var sphereIntersection = Sphere.hit(Vec3.create(0, 0, -1), 0.5, r);
+                        if (sphereIntersection.isPresent()) {
+                            Vec3 n = r.at(sphereIntersection.get()).add(Vec3.create(0, 0, 1)).unitVector();
+                            pixelWriter.setColor(i, j,
+                                    vec3toRGB(Vec3.create(n.x() + 1, n.y() + 1, n.z() + 1).multScalar(0.5)));
                         } else {
                             pixelWriter.setColor(i, j, vec3toRGB(rayColor(r)));
                         }
