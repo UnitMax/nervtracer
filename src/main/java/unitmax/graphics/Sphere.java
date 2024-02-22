@@ -28,10 +28,10 @@ public class Sphere implements Hittable {
     }
 
     @Override
-    public Optional<HitRecord> hit(Ray r, double rayTmin, double rayTmax) {
-        Vec3 originCenterVector = r.getOrigin().sub(center);
-        var a = r.getDirection().lengthSquared();
-        var halfB = originCenterVector.dotProduct(r.getDirection());
+    public Optional<HitRecord> hit(Ray ray, double rayTmin, double rayTmax) {
+        Vec3 originCenterVector = ray.getOrigin().sub(center);
+        var a = ray.getDirection().lengthSquared();
+        var halfB = originCenterVector.dotProduct(ray.getDirection());
         var c = originCenterVector.lengthSquared() - radius * radius;
         var discriminant = halfB * halfB - a * c;
         var squaredDiscriminant = Math.sqrt(discriminant);
@@ -49,7 +49,11 @@ public class Sphere implements Hittable {
             }
         }
 
-        return Optional.of(new HitRecord(r.at(root), r.at(root).sub(center).divScalar(radius), root));
+        var hitRecord = new HitRecord(ray.at(root), ray.at(root).sub(center).divScalar(radius), root);
+        var outwardNormal = hitRecord.getPoint().sub(center).divScalar(radius); // normalize because setFaceNormal expects normalized vector
+        hitRecord.setFaceNormal(ray, outwardNormal);
+
+        return Optional.of(hitRecord);
     }
 
 }
