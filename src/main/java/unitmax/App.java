@@ -1,5 +1,7 @@
 package unitmax;
 
+import java.util.Optional;
+
 import javafx.application.Application;
 import javafx.concurrent.Task;
 import javafx.geometry.Pos;
@@ -11,6 +13,9 @@ import javafx.scene.image.WritableImage;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
+import unitmax.graphics.HitRecord;
+import unitmax.graphics.Hittable;
+import unitmax.graphics.Hittables;
 import unitmax.graphics.Ray;
 import unitmax.graphics.Sphere;
 import unitmax.math.Vec3;
@@ -33,10 +38,21 @@ public class App extends Application {
         progressBar.setPrefWidth(imageWidthFX - 10);
         progressBar.setProgress(0);
 
+        // World
+        Hittables world = new Hittables();
+        world.add(new Sphere(Vec3.create(0, 0, -1), 0.5));
+        world.add(new Sphere(Vec3.create(1, 0, -1), 0.5));
+        world.add(new Sphere(Vec3.create(-1, 0, -1), 0.5));
+        world.add(new Sphere(Vec3.create(0, -100.5, -1), 100));
+
         WritableImage img = new WritableImage(400, 400 / (int) (16.0 / 9.0));
         Task<Void> task = new Task<>() {
 
-            private Vec3 rayColor(Ray r) {
+            private Vec3 rayColor(Ray r, Hittable world) {
+                Optional<HitRecord> rec = world.hit(r, 0, Double.MAX_VALUE);
+                if (rec.isPresent()) {
+                    return Vec3.create(1, 1, 1).add(rec.get().getNormal()).multScalar(0.5);
+                }
                 Vec3 unitDirection = r.getDirection().unitVector();
                 var a = (unitDirection.y() + 1.0) * 0.5;
                 return Vec3.create(1.0, 1.0, 1.0).multScalar(1.0 - a).add(Vec3.create(0.5, 0.7, 1.0).multScalar(a));
@@ -86,14 +102,7 @@ public class App extends Application {
                         var rayDirection = pixelCenter.sub(cameraCenter);
                         Ray r = new Ray(cameraCenter, rayDirection);
 
-                        var sphereIntersection = Sphere.hit(Vec3.create(0, 0, -1), 0.5, r);
-                        if (sphereIntersection.isPresent()) {
-                            Vec3 n = r.at(sphereIntersection.get()).add(Vec3.create(0, 0, 1)).unitVector();
-                            pixelWriter.setColor(i, j,
-                                    vec3toRGB(Vec3.create(n.x() + 1, n.y() + 1, n.z() + 1).multScalar(0.5)));
-                        } else {
-                            pixelWriter.setColor(i, j, vec3toRGB(rayColor(r)));
-                        }
+                        pixelWriter.setColor(i, j, vec3toRGB(rayColor(r, world)));
                     }
                 }
             }

@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-public class Hittables {
+public class Hittables implements Hittable {
     private List<Hittable> objects = new ArrayList<>();
 
     public void clear() {
@@ -15,7 +15,8 @@ public class Hittables {
         objects.add(object);
     }
 
-    Optional<HitRecord> hit(Ray r, double rayTmin, double rayTmax) {
+    @Override
+    public Optional<HitRecord> hit(Ray r, double rayTmin, double rayTmax) {
         double closestSoFar = rayTmax;
         Optional<HitRecord> returnHitRecord = Optional.empty();
 
