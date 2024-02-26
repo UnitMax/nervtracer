@@ -2,6 +2,7 @@ package unitmax.graphics;
 
 import java.util.Optional;
 
+import unitmax.math.Interval;
 import unitmax.math.Vec3;
 
 public class Sphere implements Hittable {
@@ -28,7 +29,7 @@ public class Sphere implements Hittable {
     }
 
     @Override
-    public Optional<HitRecord> hit(Ray ray, double rayTmin, double rayTmax) {
+    public Optional<HitRecord> hit(Ray ray, Interval rayT) {
         Vec3 originCenterVector = ray.getOrigin().sub(center);
         var a = ray.getDirection().lengthSquared();
         var halfB = originCenterVector.dotProduct(ray.getDirection());
@@ -41,9 +42,9 @@ public class Sphere implements Hittable {
 
         // nearest root within acceptable range
         var root = (-halfB - squaredDiscriminant) / a;
-        if (root <= rayTmin || rayTmax <= root) {
+        if (root <= rayT.getMin() || rayT.getMax() <= root) {
             root = (-halfB + squaredDiscriminant) / a;
-            if (root <= rayTmin || rayTmax <= root) {
+            if (root <= rayT.getMax() || rayT.getMax() <= root) {
                 // both outside of range, no solution
                 return Optional.empty();
             }

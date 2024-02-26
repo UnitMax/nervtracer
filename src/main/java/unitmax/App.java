@@ -18,6 +18,7 @@ import unitmax.graphics.Hittable;
 import unitmax.graphics.Hittables;
 import unitmax.graphics.Ray;
 import unitmax.graphics.Sphere;
+import unitmax.math.Interval;
 import unitmax.math.Vec3;
 
 /**
@@ -49,7 +50,7 @@ public class App extends Application {
         Task<Void> task = new Task<>() {
 
             private Vec3 rayColor(Ray r, Hittable world) {
-                Optional<HitRecord> rec = world.hit(r, 0, Double.MAX_VALUE);
+                Optional<HitRecord> rec = world.hit(r, new Interval(0, Double.POSITIVE_INFINITY));
                 if (rec.isPresent()) {
                     return Vec3.create(1, 1, 1).add(rec.get().getNormal()).multScalar(0.5);
                 }
