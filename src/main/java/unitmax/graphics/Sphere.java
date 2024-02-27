@@ -16,7 +16,7 @@ public class Sphere implements Hittable {
         this.radius = radius;
     }
 
-    public static Optional<Double> hit(Vec3 center, double radius, Ray r) {
+    private static Optional<Double> hit(Vec3 center, double radius, Ray r) {
         Vec3 originCenterVector = r.getOrigin().sub(center);
         var a = r.getDirection().lengthSquared();
         var halfB = originCenterVector.dotProduct(r.getDirection());
