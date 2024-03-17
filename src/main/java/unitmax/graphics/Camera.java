@@ -17,6 +17,7 @@ public class Camera {
     private int imageHeight;
 
     private int samplesPerPixel = 10;
+    private int maxDepth = 10; // Max number of ray bounces
 
     private Vec3 center = Vec3.create(0, 0, 0);
     private Vec3 pixel00Location;
@@ -53,7 +54,7 @@ public class Camera {
                 Vec3 pixelColor = Vec3.create(0, 0, 0);
                 for (int sample = 0; sample < samplesPerPixel; sample++) {
                     Ray ray = getRay(i, j);
-                    pixelColor = pixelColor.add(rayColor(ray, world));
+                    pixelColor = pixelColor.add(rayColor(ray, world, maxDepth));
                 }
                 this.setColor(i, j, pixelColor, samplesPerPixel);
             }
@@ -80,11 +81,16 @@ public class Camera {
         pixel00Location = viewportUpperLeft.add(pixelDeltaU.add(pixelDeltaV).multScalar(0.5));
     }
 
-    private Vec3 rayColor(Ray ray, Hittable world) {
-        Optional<HitRecord> record = world.hit(ray, new Interval(0, Double.POSITIVE_INFINITY));
+    private Vec3 rayColor(Ray ray, Hittable world, int depth) {
+        if (depth == 0) {
+            return Vec3.create(0, 0, 0);
+        }
+
+        Optional<HitRecord> record = world.hit(ray, new Interval(0.001, Double.POSITIVE_INFINITY));
 
         if (record.isPresent()) {
-            return Vec3.create(1, 1, 1).add(record.get().getNormal()).multScalar(0.5);
+            Vec3 direction = Vec3.randomOnHemisphere(record.get().getNormal());
+            return rayColor(new Ray(record.get().getPoint(), direction), world, depth - 1).multScalar(0.5);
         }
 
         Vec3 unitDirection = ray.getDirection().unitVector();
@@ -148,6 +154,22 @@ public class Camera {
 
     public int getImageHeight() {
         return imageHeight;
+    }
+
+    public int getSamplesPerPixel() {
+        return samplesPerPixel;
+    }
+
+    public int getMaxDepth() {
+        return maxDepth;
+    }
+
+    public void setSamplesPerPixel(int samplesPerPixel) {
+        this.samplesPerPixel = samplesPerPixel;
+    }
+
+    public void setMaxDepth(int maxDepth) {
+        this.maxDepth = maxDepth;
     }
 
 }

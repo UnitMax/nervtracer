@@ -139,6 +139,36 @@ public class Vec3 {
         return Math.sqrt(lengthSquared());
     }
 
+    public static Vec3 random() {
+        return Vec3.create(Util.randomDouble(), Util.randomDouble(), Util.randomDouble());
+    }
+
+    public static Vec3 random(double min, double max) {
+        var v = Vec3.create(Util.randomDouble(min, max), Util.randomDouble(min, max), Util.randomDouble(min, max));
+        return v;
+    }
+
+    public static Vec3 randomInUnitSphere() {
+        while (true) {
+            var p = random(-1.0, 1.0);
+            if (p.lengthSquared() < 1.0) {
+                return p;
+            }
+        }
+    }
+
+    public static Vec3 randomUnitVector() {
+        return randomInUnitSphere().unitVector();
+    }
+
+    public static Vec3 randomOnHemisphere(Vec3 normal) {
+        var onUnitSphere = randomUnitVector();
+        if (onUnitSphere.dotProduct(normal) > 0.0) {
+            return onUnitSphere;
+        }
+        return onUnitSphere.negative();
+    }
+
     @Override
     public String toString() {
         return "Vec3 [e=" + Arrays.toString(e) + "]";

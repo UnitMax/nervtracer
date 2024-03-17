@@ -50,6 +50,8 @@ public class App extends Application {
                 Camera camera = new Camera(pixelWriter);
                 camera.setAspectRatio(16.0 / 9.0);
                 camera.setImageWidth(400);
+                camera.setMaxDepth(50);
+                camera.setSamplesPerPixel(1000);
                 camera.render(world, (d) -> {updateProgress(d, 1.0);});
             }
 
