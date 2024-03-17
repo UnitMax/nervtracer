@@ -24,6 +24,8 @@ public class Camera {
     private Vec3 pixelDeltaU;
     private Vec3 pixelDeltaV;
 
+    private static final boolean USE_LAMBERTIAN = true;
+
     private PixelWriter pixelWriter;
 
     public Camera(PixelWriter pixelWriter) {
@@ -89,7 +91,12 @@ public class Camera {
         Optional<HitRecord> record = world.hit(ray, new Interval(0.001, Double.POSITIVE_INFINITY));
 
         if (record.isPresent()) {
-            Vec3 direction = Vec3.randomOnHemisphere(record.get().getNormal());
+            Vec3 direction;
+            if (USE_LAMBERTIAN) {
+                direction = record.get().getNormal().add(Vec3.randomUnitVector());
+            } else {
+                direction = Vec3.randomOnHemisphere(record.get().getNormal());
+            }
             return rayColor(new Ray(record.get().getPoint(), direction), world, depth - 1).multScalar(0.5);
         }
 
