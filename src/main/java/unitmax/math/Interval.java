@@ -45,5 +45,15 @@ public class Interval {
     public static Interval universe() {
         return new Interval(Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
     }
+
+    public double clamp(double x) {
+        if (x < min) {
+            return min;
+        }
+        if (x > max) {
+            return max;
+        }
+        return x;
+    }
     
 }

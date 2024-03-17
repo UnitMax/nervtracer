@@ -6,6 +6,7 @@ import java.util.function.Consumer;
 import javafx.scene.image.PixelWriter;
 import javafx.scene.paint.Color;
 import unitmax.math.Interval;
+import unitmax.math.Util;
 import unitmax.math.Vec3;
 
 public class Camera {
@@ -14,6 +15,8 @@ public class Camera {
 
     private int imageWidth = 100;
     private int imageHeight;
+
+    private int samplesPerPixel = 1000;
 
     private Vec3 center = Vec3.create(0, 0, 0);
     private Vec3 pixel00Location;
@@ -30,6 +33,13 @@ public class Camera {
         render(world, null);
     }
 
+    private void setColor(int x, int y, Vec3 pixelColor, int samplesPerPixel) {
+        var scale = 1.0 / (double) samplesPerPixel;
+        Vec3 newPixelColor = Vec3.create(pixelColor.x() * scale, pixelColor.y() * scale, pixelColor.z() * scale);
+
+        pixelWriter.setColor(x, y, vec3toRGB(newPixelColor));
+    }
+
     public void render(Hittable world, Consumer<Double> updateProgressCallback) {
         initialize();
 
@@ -39,13 +49,12 @@ public class Camera {
                 if (updateProgressCallback != null) {
                     updateProgressCallback.accept(progress);
                 }
-
-                var pixelCenter = pixel00Location.add(pixelDeltaU.multScalar(i)).add(pixelDeltaV.multScalar(j));
-                var rayDirection = pixelCenter.sub(center);
-                Ray ray = new Ray(center, rayDirection);
-
-                Vec3 pixelColor = rayColor(ray, world);
-                pixelWriter.setColor(i, j, vec3toRGB(pixelColor));
+                
+                for (int sample = 0; sample < samplesPerPixel; sample++) {
+                    Ray ray = getRay(i, j);
+                    Vec3 pixelColor = rayColor(ray, world);
+                    this.setColor(i, j, pixelColor, 1);
+                }
             }
         }
     }
@@ -83,10 +92,41 @@ public class Camera {
     }
 
     private static final Color vec3toRGB(Vec3 v) {
-        int ir = (int) (255.999 * v.x());
-        int ig = (int) (255.999 * v.y());
-        int ib = (int) (255.999 * v.z());
+        final Interval intensity = new Interval(0.000, 0.999);
+        int ir = (int) (256 * intensity.clamp(v.x()));
+        int ig = (int) (256 * intensity.clamp(v.y()));
+        int ib = (int) (256 * intensity.clamp(v.z()));
         return Color.rgb(ir, ig, ib);
+    }
+
+    private Ray getRay(int i, int j) {
+        var pixelCenter = pixel00Location.add(pixelDeltaU.multScalar(i)).add(pixelDeltaV.multScalar(j));
+        var pixelSample = pixelCenter.add(pixelSampleSquare());
+
+        var rayOrigin = center;
+        var rayDirection = pixelSample.sub(rayOrigin);
+
+        return new Ray(rayOrigin, rayDirection);
+    }
+
+    private Vec3 pixelSampleSquare() {
+        // /-----------\
+        // |a      *  b|
+        // |           |
+        // |   *       |
+        // |     x  *  | <--- Origin (0,0)
+        // |           |
+        // | *         |
+        // |d         c|
+        // \-----------/
+        // a = (-0.5,-0.5)
+        // b = (0.5,-0.5)
+        // c = (0.5,0.5)
+        // d = (-0.5,0.5)
+        // Returns randomly sampled point like *
+        var px = -0.5 + Util.randomDouble();
+        var py = -0.5 + Util.randomDouble();
+        return pixelDeltaU.multScalar(px).add(pixelDeltaV.multScalar(py));
     }
 
     public double getAspectRatio() {
