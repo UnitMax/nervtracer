@@ -6,6 +6,7 @@ import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
+import javafx.scene.image.ImageView;
 import javafx.scene.image.PixelWriter;
 import javafx.scene.image.WritableImage;
 import javafx.scene.layout.VBox;
@@ -40,9 +41,10 @@ public class App extends Application {
         world.add(new Sphere(Vec3.create(-1, 0, -1), 0.5));
         world.add(new Sphere(Vec3.create(0, -100.5, -1), 100));
 
+        ImageView imageView = new javafx.scene.image.ImageView();
         WritableImage img = new WritableImage(400, (int)(400.0 / (16.0 / 9.0)));
         label.setText(label.getText() + "\n" + "W: " + img.getWidth() + " / H: " + img.getHeight());
-        Task<Void> task = new Task<>() {
+        final Task<Void> task = new Task<>() {
 
             private void drawImage(WritableImage img) throws Exception {
                 PixelWriter pixelWriter = img.getPixelWriter();
@@ -51,13 +53,14 @@ public class App extends Application {
                 camera.setAspectRatio(16.0 / 9.0);
                 camera.setImageWidth(400);
                 camera.setMaxDepth(50);
-                camera.setSamplesPerPixel(1000);
+                camera.setSamplesPerPixel(250);
                 camera.render(world, (d) -> {updateProgress(d, 1.0);});
             }
 
             @Override
             protected Void call() throws Exception {
                 drawImage(img);
+                imageView.setImage(img);
                 return null;
             }
         };
@@ -69,7 +72,7 @@ public class App extends Application {
 
         VBox root = new VBox(5);
         root.setAlignment(Pos.CENTER);
-        root.getChildren().addAll(progressBar, new javafx.scene.image.ImageView(img), label);
+        root.getChildren().addAll(progressBar, imageView, label);
 
         Scene scene = new Scene(root, imageWidthFX, imageHeightFX + 50);
         stage.setTitle("nervtracer");
