@@ -16,7 +16,7 @@ public class Camera {
     private int imageWidth = 100;
     private int imageHeight;
 
-    private int samplesPerPixel = 1000;
+    private int samplesPerPixel = 10;
 
     private Vec3 center = Vec3.create(0, 0, 0);
     private Vec3 pixel00Location;
@@ -50,11 +50,12 @@ public class Camera {
                     updateProgressCallback.accept(progress);
                 }
                 
+                Vec3 pixelColor = Vec3.create(0, 0, 0);
                 for (int sample = 0; sample < samplesPerPixel; sample++) {
                     Ray ray = getRay(i, j);
-                    Vec3 pixelColor = rayColor(ray, world);
-                    this.setColor(i, j, pixelColor, 1);
+                    pixelColor = pixelColor.add(rayColor(ray, world));
                 }
+                this.setColor(i, j, pixelColor, samplesPerPixel);
             }
         }
     }
@@ -92,10 +93,10 @@ public class Camera {
     }
 
     private static final Color vec3toRGB(Vec3 v) {
-        final Interval intensity = new Interval(0.000, 0.999);
-        int ir = (int) (256 * intensity.clamp(v.x()));
-        int ig = (int) (256 * intensity.clamp(v.y()));
-        int ib = (int) (256 * intensity.clamp(v.z()));
+        final Interval intensity = new Interval(0.0, 0.999);
+        int ir = (int) ((double) 256 * intensity.clamp(v.x()));
+        int ig = (int) ((double) 256 * intensity.clamp(v.y()));
+        int ib = (int) ((double) 256 * intensity.clamp(v.z()));
         return Color.rgb(ir, ig, ib);
     }
 
