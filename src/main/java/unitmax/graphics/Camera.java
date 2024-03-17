@@ -36,9 +36,16 @@ public class Camera {
         render(world, null);
     }
 
+    private double linearToGamma(double linearComponent) {
+        return Math.sqrt(linearComponent);
+    }
+
     private void setColor(int x, int y, Vec3 pixelColor, int samplesPerPixel) {
         var scale = 1.0 / (double) samplesPerPixel;
-        Vec3 newPixelColor = Vec3.create(pixelColor.x() * scale, pixelColor.y() * scale, pixelColor.z() * scale);
+        var r = linearToGamma(pixelColor.x() * scale);
+        var g = linearToGamma(pixelColor.y() * scale);
+        var b = linearToGamma(pixelColor.z() * scale);
+        Vec3 newPixelColor = Vec3.create(r, g, b);
 
         pixelWriter.setColor(x, y, vec3toRGB(newPixelColor));
     }
